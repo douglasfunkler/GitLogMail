@@ -1,3 +1,5 @@
+package org.example;
+
 import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -6,15 +8,14 @@ import java.io.InputStreamReader;
 public class GitLogExtractor {
 
     public static void main(String[] args) {
-        String repositoryPath = "C:\\Users\\Douglas\\IdeaProjects\\GitLogMail";
-        String outputPath = "C:\\Users\\Douglas\\IdeaProjects\\GitLogMail\\logs\\gitLog.txt";
-
-        extractGitLog(repositoryPath, outputPath);
+        new GitLogExtractor().extractGitLog();
     }
 
-    public static void extractGitLog(String repoPath, String outputPath) {
+    public void extractGitLog() {
+        final var repositoryPath = "C:\\Users\\Douglas\\IdeaProjects\\GitLogMail";
+        String outputPath = "C:\\Users\\Douglas\\IdeaProjects\\GitLogMail\\logs\\gitLog.txt";
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.directory(new java.io.File(repoPath));
+        processBuilder.directory(new java.io.File(repositoryPath));
         processBuilder.command("git", "log");
 
         try {
