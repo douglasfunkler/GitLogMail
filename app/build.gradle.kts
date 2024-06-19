@@ -16,6 +16,10 @@ repositories {
 }
 
 dependencies {
+    implementation("com.sun.mail:javax.mail:1.6.2")
+    implementation("org.apache.poi:poi-scratchpad:5.2.3")
+    implementation("org.jetbrains:annotations:24.0.1")
+
     // Use JUnit test framework.
     testImplementation(libs.junit)
 
