@@ -20,6 +20,12 @@ dependencies {
     implementation("org.apache.poi:poi-scratchpad:5.2.3")
     implementation("org.jetbrains:annotations:24.0.1")
 
+    compileOnly("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
+
+    testCompileOnly("org.projectlombok:lombok:1.18.32")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
+
     // Use JUnit test framework.
     testImplementation(libs.junit)
 
