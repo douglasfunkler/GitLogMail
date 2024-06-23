@@ -1,5 +1,6 @@
 package org.example;
 
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,53 +9,105 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.List;
 import java.util.Properties;
 
-public class GitLogExtractor {
+import static javax.swing.JOptionPane.showMessageDialog;
+import static javax.swing.SwingUtilities.invokeLater;
 
-    public static void main(String @NotNull [] args) {
+public class GitLogExtractor extends JFrame {
 
-        // Get the repository path from the command line arguments
-        String repositoryPath = "C:\\Users\\Douglas\\IdeaProjects\\GitLogMail";
-        File repoDir = new File(repositoryPath);
+    private final JTextField repoPathField;
+    private final JTextArea logTextArea;
 
-        // Check if the specified directory exists and is a directory
-        if (!repoDir.exists() || !repoDir.isDirectory()) {
-            System.out.println("The specified path is not a valid directory: " + repositoryPath);
-            return;
-        }
-
-        // Extract the git log
-        String gitLog = getGitLog(repoDir);
-        if (gitLog == null) {
-            System.out.println("Failed to extract git log.");
-            return;
-        }
-
-        // Email details
-        String to = "recipient@example.com";
-        String from = "sender@example.com";
-        String subject = "Git Log Report";
-        String bodyText = "This is the git log of the repository:\n\n" + gitLog;
-
-        // Create and save the email message
-        createAndSaveEmail(from, to, subject, bodyText, "git_log_email.eml");
+    public static void main(String[] args) {
+        invokeLater(() -> new GitLogExtractor().setVisible(true));
     }
 
-    private static @Nullable String getGitLog(File repoDir) {
-        List<String> gitCommand = List.of("git", "log");
+    public GitLogExtractor() {
+        super("Git Log Email Creator");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(600, 400);
+        setLocationRelativeTo(null);
 
-        ProcessBuilder processBuilder = new ProcessBuilder(gitCommand);
+        val mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout());
+
+        val topPanel  = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        val repoLabel = new JLabel("Git Repository Path:");
+        repoPathField = new JTextField(30);
+        topPanel.add(repoLabel);
+        topPanel.add(repoPathField);
+
+        val extractLogButton = getLogButton();
+        topPanel.add(extractLogButton);
+
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+
+        logTextArea = new JTextArea(20, 50);
+        logTextArea.setEditable(false);
+        val logScrollPane = new JScrollPane(logTextArea);
+        mainPanel.add(logScrollPane, BorderLayout.CENTER);
+
+        val createEmailButton = getEmailButton();
+        mainPanel.add(createEmailButton, BorderLayout.SOUTH);
+
+        add(mainPanel);
+    }
+
+    private @NotNull JButton getEmailButton() {
+        val createEmailButton = new JButton("Create Email");
+        createEmailButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                val repoPath = repoPathField.getText().trim();
+                if (!repoPath.isEmpty()) {
+                    val gitLog = logTextArea.getText();
+                    if (!gitLog.isEmpty()) {
+                        createAndSaveEmail("sender@example.com", "recipient@example.com", "Git Log Report", gitLog, "git_log_email.eml");
+                        showMessageDialog(GitLogExtractor.this, "Email created and saved successfully.");
+                    } else {
+                        showMessageDialog(GitLogExtractor.this, "Please extract Git log first.");
+                    }
+                } else {
+                    showMessageDialog(GitLogExtractor.this, "Please enter a valid repository path.");
+                }
+            }
+        });
+        return createEmailButton;
+    }
+
+    private @NotNull JButton getLogButton() {
+        val extractLogButton = new JButton("Extract Git Log");
+        extractLogButton.addActionListener(e -> {
+            val repoPath = repoPathField.getText().trim();
+            if (!repoPath.isEmpty()) {
+                String gitLog = getGitLog(new File(repoPath));
+                logTextArea.setText(gitLog != null ? gitLog : "Failed to extract Git log.");
+            } else {
+                showMessageDialog(GitLogExtractor.this, "Please enter a valid repository path.");
+            }
+        });
+        return extractLogButton;
+    }
+
+    private @Nullable String getGitLog(File repoDir) {
+        val gitCommand = List.of("git", "log", "--pretty=format:%s%nAuthor: %an%nDate: %ad%nCommit: %H%n");
+
+        val processBuilder = new ProcessBuilder(gitCommand);
         processBuilder.directory(repoDir);
         processBuilder.redirectErrorStream(true);
 
         try {
-            Process process = processBuilder.start();
-            InputStream inputStream = process.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder gitLog = new StringBuilder();
+            val process = processBuilder.start();
+            val inputStream = process.getInputStream();
+            val reader = new BufferedReader(new InputStreamReader(inputStream));
+            val gitLog = new StringBuilder();
             String line;
 
             while ((line = reader.readLine()) != null) {
@@ -71,26 +124,26 @@ public class GitLogExtractor {
         }
     }
 
-    private static void createAndSaveEmail(String from, String to, String subject, String bodyText, String filePath) {
-        Properties props = new Properties();
-        props.put("mail.smtp.host", "localhost"); // Dummy SMTP host for creating the email file
+    private void createAndSaveEmail(String from, String to, String subject, String bodyText, String filePath) {
+        val properties = new Properties();
+        properties.put("mail.smtp.host", "localhost"); // Dummy SMTP host for creating the email file
 
-        Session session = Session.getDefaultInstance(props, null);
+        val session = Session.getDefaultInstance(properties, null);
 
         try {
-            MimeMessage message = new MimeMessage(session);
+            val message = new MimeMessage(session);
             message.setFrom(new InternetAddress(from));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
             message.setSubject(subject);
             message.setText(bodyText);
 
             // Save the message to a .eml file
-            File emlFile = new File("C:\\Users\\Douglas\\IdeaProjects\\GitLogMail\\logs\\email_message.eml");
-            try (FileOutputStream fos = new FileOutputStream(emlFile)) {
+            val emlFile = new File(filePath);
+            try (val fos = new FileOutputStream(emlFile)) {
                 message.writeTo(fos);
             }
 
-            System.out.println("Email message saved to " + filePath);
+            System.out.println("Email message saved to " + emlFile.getAbsolutePath());
 
         } catch (MessagingException | IOException e) {
             e.printStackTrace();
