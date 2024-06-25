@@ -1,5 +1,7 @@
 package org.example;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import javax.mail.Message;
@@ -17,15 +19,21 @@ import java.util.Properties;
 
 public class GitLogExtractor extends JFrame {
 
+    private static final Logger log = LogManager.getLogger(GitLogExtractor.class);
     private JTextField repoPathField1;
     private JTextField repoPathField2;
     private JTextArea logTextArea;
+    private Properties properties;
+    private static final String PROPERTIES_FILE = "src/main/resources/config.properties";
 
     public GitLogExtractor() {
         super("Git Log Email Creator");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(600, 500);
         setLocationRelativeTo(null);
+
+        properties = new Properties();
+        loadProperties();
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
@@ -124,6 +132,25 @@ public class GitLogExtractor extends JFrame {
         mainPanel.add(saveFileButton, BorderLayout.SOUTH);
 
         add(mainPanel);
+    }
+
+    private void loadProperties() {
+        try (InputStream input = new FileInputStream(PROPERTIES_FILE)) {
+            properties.load(input);
+            String repoPath1 = properties.getProperty("repoPathField1", "");
+            String repoPath2 = properties.getProperty("repoPathField2", "");
+
+            // Update GUI components
+            SwingUtilities.invokeLater(() -> {
+                repoPathField1.setText(repoPath1);
+                repoPathField2.setText(repoPath2);
+            });
+
+        } catch (FileNotFoundException ex) {
+           log.error("Configuration properties not found!");
+        } catch (IOException ex) {
+            log.error("Unable to read configuration properties file!");
+        }
     }
 
     private @Nullable String getGitLog(File repoDir) {
