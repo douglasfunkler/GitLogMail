@@ -1,5 +1,7 @@
 package org.example;
 
+import org.jetbrains.annotations.Nullable;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -15,39 +17,61 @@ import java.util.Properties;
 
 public class GitLogExtractor extends JFrame {
 
-    private JTextField repoPathField;
+    private JTextField repoPathField1;
+    private JTextField repoPathField2;
     private JTextArea logTextArea;
 
     public GitLogExtractor() {
         super("Git Log Email Creator");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(600, 400);
+        setSize(600, 500);
         setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
 
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel repoLabel = new JLabel("Git Repository Path:");
-        repoPathField = new JTextField(30);
-        topPanel.add(repoLabel);
-        topPanel.add(repoPathField);
+        JPanel topPanel = new JPanel(new GridLayout(3, 1));
+        JPanel repoPanel1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel repoPanel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        JButton extractLogButton = new JButton("Extract Git Log");
+        JLabel repoLabel1 = new JLabel("Git Repository Path 1:");
+        repoPathField1 = new JTextField(30);
+        repoPanel1.add(repoLabel1);
+        repoPanel1.add(repoPathField1);
+
+        JLabel repoLabel2 = new JLabel("Git Repository Path 2:");
+        repoPathField2 = new JTextField(30);
+        repoPanel2.add(repoLabel2);
+        repoPanel2.add(repoPathField2);
+
+        JButton extractLogButton = new JButton("Extract Git Logs");
         extractLogButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String repoPath = repoPathField.getText().trim();
-                if (!repoPath.isEmpty()) {
-                    String gitLog = getGitLog(new File(repoPath));
-                    logTextArea.setText(gitLog != null ? gitLog : "Failed to extract Git log.");
-                } else {
-                    JOptionPane.showMessageDialog(GitLogExtractor.this, "Please enter a valid repository path.");
+                String repoPath1 = repoPathField1.getText().trim();
+                String repoPath2 = repoPathField2.getText().trim();
+
+                StringBuilder gitLog = new StringBuilder();
+                if (!repoPath1.isEmpty()) {
+                    gitLog.append("Repository 1:\n");
+                    String log1 = getGitLog(new File(repoPath1));
+                    gitLog.append(log1 != null ? log1 : "Failed to extract Git log for repository 1.\n");
                 }
+                if (!repoPath2.isEmpty()) {
+                    gitLog.append("\nRepository 2:\n");
+                    String log2 = getGitLog(new File(repoPath2));
+                    gitLog.append(log2 != null ? log2 : "Failed to extract Git log for repository 2.\n");
+                }
+
+                logTextArea.setText(gitLog.toString());
             }
         });
-        topPanel.add(extractLogButton);
+        buttonPanel.add(extractLogButton);
 
+        topPanel.add(repoPanel1);
+        topPanel.add(repoPanel2);
+        topPanel.add(buttonPanel);
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
         logTextArea = new JTextArea(20, 50);
@@ -59,17 +83,14 @@ public class GitLogExtractor extends JFrame {
         createEmailButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String repoPath = repoPathField.getText().trim();
-                if (!repoPath.isEmpty()) {
-                    String gitLog = logTextArea.getText();
-                    if (!gitLog.isEmpty()) {
-                        createAndSaveEmail("sender@example.com", "recipient@example.com", "Git Log Report", gitLog, "git_log_email.eml");
-                        JOptionPane.showMessageDialog(GitLogExtractor.this, "Email created and saved successfully.");
-                    } else {
-                        JOptionPane.showMessageDialog(GitLogExtractor.this, "Please extract Git log first.");
-                    }
+                String repoPath1 = repoPathField1.getText().trim();
+                String repoPath2 = repoPathField2.getText().trim();
+                String gitLog = logTextArea.getText();
+                if ((!repoPath1.isEmpty() || !repoPath2.isEmpty()) && !gitLog.isEmpty()) {
+                    createAndSaveEmail("sender@example.com", "recipient@example.com", "Git Log Report", gitLog, "git_log_email.eml");
+                    JOptionPane.showMessageDialog(GitLogExtractor.this, "Email created and saved successfully.");
                 } else {
-                    JOptionPane.showMessageDialog(GitLogExtractor.this, "Please enter a valid repository path.");
+                    JOptionPane.showMessageDialog(GitLogExtractor.this, "Please enter valid repository paths and extract the Git logs first.");
                 }
             }
         });
@@ -78,7 +99,7 @@ public class GitLogExtractor extends JFrame {
         add(mainPanel);
     }
 
-    private String getGitLog(File repoDir) {
+    private @Nullable String getGitLog(File repoDir) {
         List<String> gitCommand = List.of("git", "log", "--pretty=format:%s%nAuthor: %an%nDate: %ad%nCommit: %H%n");
 
         ProcessBuilder processBuilder = new ProcessBuilder(gitCommand);
