@@ -79,22 +79,21 @@ public class GitLogExtractor extends JFrame {
         JScrollPane logScrollPane = new JScrollPane(logTextArea);
         mainPanel.add(logScrollPane, BorderLayout.CENTER);
 
-        JButton createEmailButton = new JButton("Create Email");
-        createEmailButton.addActionListener(new ActionListener() {
+        JButton saveFileButton = new JButton("Save Log to File");
+        saveFileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String repoPath1 = repoPathField1.getText().trim();
                 String repoPath2 = repoPathField2.getText().trim();
                 String gitLog = logTextArea.getText();
                 if ((!repoPath1.isEmpty() || !repoPath2.isEmpty()) && !gitLog.isEmpty()) {
-                    createAndSaveEmail("sender@example.com", "recipient@example.com", "Git Log Report", gitLog, "git_log_email.eml");
-                    JOptionPane.showMessageDialog(GitLogExtractor.this, "Email created and saved successfully.");
+                    saveLogToFile(gitLog);
                 } else {
                     JOptionPane.showMessageDialog(GitLogExtractor.this, "Please enter valid repository paths and extract the Git logs first.");
                 }
             }
         });
-        mainPanel.add(createEmailButton, BorderLayout.SOUTH);
+        mainPanel.add(saveFileButton, BorderLayout.SOUTH);
 
         add(mainPanel);
     }
@@ -124,6 +123,22 @@ public class GitLogExtractor extends JFrame {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private void saveLogToFile(String gitLog) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save Git Log");
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            if (!fileToSave.getAbsolutePath().endsWith(".eml")) {
+                fileToSave = new File(fileToSave.getAbsolutePath() + ".eml");
+            }
+
+            createAndSaveEmail("sender@example.com", "recipient@example.com", "Git Log Report", gitLog, fileToSave.getAbsolutePath());
+            JOptionPane.showMessageDialog(this, "Log saved successfully to " + fileToSave.getAbsolutePath());
         }
     }
 
