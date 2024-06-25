@@ -46,7 +46,7 @@ public class GitLogExtractor extends JFrame {
         JPanel topButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JPanel bottomButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        JLabel repoLabel1 = new JLabel("Dictionary repository:");
+        JLabel repoLabel1 = new JLabel("Dictionary repository:      ");
         repoPathField1 = new JTextField(30);
         JButton browseButton1 = new JButton("Browse");
         browseButton1.addActionListener(e -> {
