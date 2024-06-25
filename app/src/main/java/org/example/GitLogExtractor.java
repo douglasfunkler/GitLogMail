@@ -37,13 +37,41 @@ public class GitLogExtractor extends JFrame {
 
         JLabel repoLabel1 = new JLabel("Git Repository Path 1:");
         repoPathField1 = new JTextField(30);
+        JButton browseButton1 = new JButton("Browse");
+        browseButton1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                int returnValue = fileChooser.showOpenDialog(GitLogExtractor.this);
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    repoPathField1.setText(selectedFile.getAbsolutePath());
+                }
+            }
+        });
         repoPanel1.add(repoLabel1);
         repoPanel1.add(repoPathField1);
+        repoPanel1.add(browseButton1);
 
         JLabel repoLabel2 = new JLabel("Git Repository Path 2:");
         repoPathField2 = new JTextField(30);
+        JButton browseButton2 = new JButton("Browse");
+        browseButton2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                int returnValue = fileChooser.showOpenDialog(GitLogExtractor.this);
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    repoPathField2.setText(selectedFile.getAbsolutePath());
+                }
+            }
+        });
         repoPanel2.add(repoLabel2);
         repoPanel2.add(repoPathField2);
+        repoPanel2.add(browseButton2);
 
         JButton extractLogButton = new JButton("Extract Git Logs");
         extractLogButton.addActionListener(new ActionListener() {
@@ -155,13 +183,16 @@ public class GitLogExtractor extends JFrame {
             message.setSubject(subject);
             message.setText(bodyText);
 
+            // Mark the message as a draft
+            message.addHeader("X-Unsent", "1");
+
             // Save the message to a .eml file
             File emlFile = new File(filePath);
             try (FileOutputStream fos = new FileOutputStream(emlFile)) {
                 message.writeTo(fos);
             }
 
-            System.out.println("Email message saved to " + emlFile.getAbsolutePath());
+            System.out.println("Email draft saved to " + emlFile.getAbsolutePath());
 
         } catch (MessagingException | IOException e) {
             e.printStackTrace();
