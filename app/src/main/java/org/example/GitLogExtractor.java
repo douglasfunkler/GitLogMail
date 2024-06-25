@@ -33,7 +33,7 @@ public class GitLogExtractor extends JFrame {
         JPanel topPanel = new JPanel(new GridLayout(3, 1));
         JPanel repoPanel1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel repoPanel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         JLabel repoLabel1 = new JLabel("Git Repository Path 1:");
         repoPathField1 = new JTextField(30);
