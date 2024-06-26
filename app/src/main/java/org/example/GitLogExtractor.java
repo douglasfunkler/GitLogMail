@@ -113,10 +113,8 @@ public class GitLogExtractor extends JFrame {
 
         JButton saveFileButton = new JButton("Save log to email file");
         saveFileButton.addActionListener(e -> {
-            String repoPath1 = repoPathField1.getText().trim();
-            String repoPath2 = repoPathField2.getText().trim();
             String gitLog = logTextArea.getText();
-            if ((!repoPath1.isEmpty() || !repoPath2.isEmpty()) && !gitLog.isEmpty()) {
+            if (!gitLog.isEmpty()) {
                 saveLogToFile(gitLog);
             } else {
                 showMessageDialog(GitLogExtractor.this, "Please enter valid repository paths and extract the Git logs first.");
@@ -130,8 +128,7 @@ public class GitLogExtractor extends JFrame {
             if (!gitLog.isEmpty()) {
                 saveGitLogToTextFile(gitLog);
             } else {
-                showMessageDialog(GitLogExtractor.this,
-                        "Please extract the Git logs first.");
+                showMessageDialog(GitLogExtractor.this, "Please extract the Git logs first.");
             }
         });
         bottomButtonPanel.add(saveGitLogButton);
