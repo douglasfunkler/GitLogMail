@@ -82,6 +82,8 @@ public class GitLogExtractor extends JFrame {
             String repoPath2 = repoPathField2.getText().trim();
 
             StringBuilder gitLog = new StringBuilder();
+            String textBefore = "=== Beginning of Git Logs ===\n\n";
+            gitLog.append(textBefore);
             if (!repoPath1.isEmpty()) {
                 gitLog.append("Repository 1:\n");
                 String log1 = getGitLog(new File(repoPath1));
@@ -93,6 +95,8 @@ public class GitLogExtractor extends JFrame {
                 gitLog.append(log2 != null ? log2 : "Failed to extract Git log for repository 2.\n");
             }
 
+            String textAfter = "\n\n=== End of Git Logs ===";
+            gitLog.append(textAfter);
             logTextArea.setText(gitLog.toString());
         });
         topButtonPanel.add(extractLogButton);
