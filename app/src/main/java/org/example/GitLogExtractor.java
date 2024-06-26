@@ -11,8 +11,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.List;
 import java.util.Properties;
@@ -22,10 +20,10 @@ import static javax.swing.JOptionPane.showMessageDialog;
 public class GitLogExtractor extends JFrame {
 
     private static final Logger log = LogManager.getLogger(GitLogExtractor.class);
-    private JTextField repoPathField1;
-    private JTextField repoPathField2;
+    private final JTextField repoPathField1;
+    private final JTextField repoPathField2;
     private JTextArea logTextArea;
-    private Properties properties;
+    private final Properties properties;
     private static final String PROPERTIES_FILE = "src/main/resources/config.properties";
 
     public GitLogExtractor() {
@@ -65,16 +63,13 @@ public class GitLogExtractor extends JFrame {
         JLabel repoLabel2 = new JLabel("Yellow Pages repository:");
         repoPathField2 = new JTextField(30);
         JButton browseButton2 = new JButton("Browse");
-        browseButton2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                int returnValue = fileChooser.showOpenDialog(GitLogExtractor.this);
-                if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    repoPathField2.setText(selectedFile.getAbsolutePath());
-                }
+        browseButton2.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int returnValue = fileChooser.showOpenDialog(GitLogExtractor.this);
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                repoPathField2.setText(selectedFile.getAbsolutePath());
             }
         });
         repoPanel2.add(repoLabel2);
@@ -261,10 +256,6 @@ public class GitLogExtractor extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new GitLogExtractor().setVisible(true);
-            }
-        });
+        SwingUtilities.invokeLater(() -> new GitLogExtractor().setVisible(true));
     }
 }
