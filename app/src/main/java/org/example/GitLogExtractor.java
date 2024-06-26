@@ -29,7 +29,7 @@ public class GitLogExtractor extends JFrame {
     private static final String PROPERTIES_FILE = "src/main/resources/config.properties";
 
     public GitLogExtractor() {
-        super("Git Log Email Creator");
+        super("Git Log Extractor");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(600, 500);
         setLocationRelativeTo(null);
@@ -101,6 +101,10 @@ public class GitLogExtractor extends JFrame {
             logTextArea.setText(gitLog.toString());
         });
         topButtonPanel.add(extractLogButton);
+
+        JButton clearLogsButton = new JButton("Clear logs");
+        clearLogsButton.addActionListener(e -> logTextArea.setText(""));
+        topButtonPanel.add(clearLogsButton);
 
         topPanel.add(repoPanel1);
         topPanel.add(repoPanel2);
@@ -221,7 +225,7 @@ public class GitLogExtractor extends JFrame {
                 writer.println(gitLog);
                 showMessageDialog(this, "Git log saved successfully to " + fileToSave.getAbsolutePath());
             } catch (FileNotFoundException ex) {
-               log.error("Unable to write to text file!");
+                log.error("Unable to write to text file!");
                 showMessageDialog(this, "Error saving Git log to file.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
