@@ -15,7 +15,14 @@ import java.io.*;
 import java.util.List;
 import java.util.Properties;
 
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.SOUTH;
+import static java.awt.FlowLayout.CENTER;
+import static java.awt.FlowLayout.LEFT;
+import static javax.swing.JFileChooser.APPROVE_OPTION;
+import static javax.swing.JFileChooser.DIRECTORIES_ONLY;
 import static javax.swing.JOptionPane.showMessageDialog;
+import static javax.swing.SwingUtilities.invokeLater;
 
 public class GitLogExtractor extends JFrame {
 
@@ -28,7 +35,7 @@ public class GitLogExtractor extends JFrame {
 
     public GitLogExtractor() {
         super("Git Log Extractor");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(600, 500);
         setLocationRelativeTo(null);
 
@@ -39,19 +46,19 @@ public class GitLogExtractor extends JFrame {
         mainPanel.setLayout(new BorderLayout());
 
         JPanel topPanel = new JPanel(new GridLayout(3, 1));
-        JPanel repoPanel1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel repoPanel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel topButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JPanel bottomButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel repoPanel1 = new JPanel(new FlowLayout(LEFT));
+        JPanel repoPanel2 = new JPanel(new FlowLayout(LEFT));
+        JPanel topButtonPanel = new JPanel(new FlowLayout(CENTER));
+        JPanel bottomButtonPanel = new JPanel(new FlowLayout(CENTER));
 
         JLabel repoLabel1 = new JLabel("Dictionary repository:      ");
         repoPathField1 = new JTextField(30);
         JButton browseButton1 = new JButton("Browse");
         browseButton1.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            fileChooser.setFileSelectionMode(DIRECTORIES_ONLY);
             int returnValue = fileChooser.showOpenDialog(GitLogExtractor.this);
-            if (returnValue == JFileChooser.APPROVE_OPTION) {
+            if (returnValue == APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
                 repoPathField1.setText(selectedFile.getAbsolutePath());
             }
@@ -65,9 +72,9 @@ public class GitLogExtractor extends JFrame {
         JButton browseButton2 = new JButton("Browse");
         browseButton2.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            fileChooser.setFileSelectionMode(DIRECTORIES_ONLY);
             int returnValue = fileChooser.showOpenDialog(GitLogExtractor.this);
-            if (returnValue == JFileChooser.APPROVE_OPTION) {
+            if (returnValue == APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
                 repoPathField2.setText(selectedFile.getAbsolutePath());
             }
@@ -108,12 +115,12 @@ public class GitLogExtractor extends JFrame {
         topPanel.add(repoPanel1);
         topPanel.add(repoPanel2);
         topPanel.add(topButtonPanel);
-        mainPanel.add(topPanel, BorderLayout.NORTH);
+        mainPanel.add(topPanel, NORTH);
 
         logTextArea = new JTextArea(20, 50);
         logTextArea.setEditable(false);
         JScrollPane logScrollPane = new JScrollPane(logTextArea);
-        mainPanel.add(logScrollPane, BorderLayout.CENTER);
+        mainPanel.add(logScrollPane, CENTER);
 
         JButton saveFileButton = new JButton("Save log to email file");
         saveFileButton.addActionListener(e -> {
@@ -137,7 +144,7 @@ public class GitLogExtractor extends JFrame {
         });
         bottomButtonPanel.add(saveGitLogButton);
 
-        mainPanel.add(bottomButtonPanel, BorderLayout.SOUTH);
+        mainPanel.add(bottomButtonPanel, SOUTH);
         add(mainPanel);
     }
 
@@ -148,7 +155,7 @@ public class GitLogExtractor extends JFrame {
             String repoPath2 = properties.getProperty("repoPathField2", "");
 
             // Update GUI components
-            SwingUtilities.invokeLater(() -> {
+            invokeLater(() -> {
                 repoPathField1.setText(repoPath1);
                 repoPathField2.setText(repoPath2);
             });
@@ -193,7 +200,7 @@ public class GitLogExtractor extends JFrame {
         fileChooser.setDialogTitle("Save Git Log");
         int userSelection = fileChooser.showSaveDialog(this);
 
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
+        if (userSelection == APPROVE_OPTION) {
             File fileToSave = fileChooser.getSelectedFile();
 
             if (!fileToSave.getAbsolutePath().endsWith(".eml")) {
@@ -210,7 +217,7 @@ public class GitLogExtractor extends JFrame {
         fileChooser.setDialogTitle("Save Git Log");
         int userSelection = fileChooser.showSaveDialog(this);
 
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
+        if (userSelection == APPROVE_OPTION) {
             File fileToSave = fileChooser.getSelectedFile();
 
             if (!fileToSave.getAbsolutePath().endsWith(".txt")) {
@@ -257,6 +264,6 @@ public class GitLogExtractor extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new GitLogExtractor().setVisible(true));
+        invokeLater(() -> new GitLogExtractor().setVisible(true));
     }
 }
