@@ -11,6 +11,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.List;
 import java.util.Properties;
@@ -20,10 +22,10 @@ import static javax.swing.JOptionPane.showMessageDialog;
 public class GitLogExtractor extends JFrame {
 
     private static final Logger log = LogManager.getLogger(GitLogExtractor.class);
-    private final JTextField repoPathField1;
-    private final JTextField repoPathField2;
+    private JTextField repoPathField1;
+    private JTextField repoPathField2;
     private JTextArea logTextArea;
-    private final Properties properties;
+    private Properties properties;
     private static final String PROPERTIES_FILE = "src/main/resources/config.properties";
 
     public GitLogExtractor() {
@@ -63,13 +65,16 @@ public class GitLogExtractor extends JFrame {
         JLabel repoLabel2 = new JLabel("Yellow Pages repository:");
         repoPathField2 = new JTextField(30);
         JButton browseButton2 = new JButton("Browse");
-        browseButton2.addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            int returnValue = fileChooser.showOpenDialog(GitLogExtractor.this);
-            if (returnValue == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = fileChooser.getSelectedFile();
-                repoPathField2.setText(selectedFile.getAbsolutePath());
+        browseButton2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                int returnValue = fileChooser.showOpenDialog(GitLogExtractor.this);
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    repoPathField2.setText(selectedFile.getAbsolutePath());
+                }
             }
         });
         repoPanel2.add(repoLabel2);
@@ -116,10 +121,10 @@ public class GitLogExtractor extends JFrame {
             String repoPath1 = repoPathField1.getText().trim();
             String repoPath2 = repoPathField2.getText().trim();
             String gitLog = logTextArea.getText();
-            if (!gitLog.isEmpty()) {
+            if ((!repoPath1.isEmpty() || !repoPath2.isEmpty()) && !gitLog.isEmpty()) {
                 saveLogToFile(gitLog);
             } else {
-                showMessageDialog(GitLogExtractor.this, "The Git logs must be extracted first.");
+                showMessageDialog(GitLogExtractor.this, "Please enter valid repository paths and extract the Git logs first.");
             }
         });
         bottomButtonPanel.add(saveFileButton);
@@ -130,7 +135,8 @@ public class GitLogExtractor extends JFrame {
             if (!gitLog.isEmpty()) {
                 saveGitLogToTextFile(gitLog);
             } else {
-                showMessageDialog(GitLogExtractor.this, "The Git logs must be extracted first.");
+                showMessageDialog(GitLogExtractor.this,
+                        "Please extract the Git logs first.");
             }
         });
         bottomButtonPanel.add(saveGitLogButton);
@@ -255,6 +261,10 @@ public class GitLogExtractor extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new GitLogExtractor().setVisible(true));
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new GitLogExtractor().setVisible(true);
+            }
+        });
     }
 }
