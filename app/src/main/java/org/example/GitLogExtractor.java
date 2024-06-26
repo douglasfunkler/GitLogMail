@@ -160,7 +160,7 @@ public class GitLogExtractor extends JFrame {
     }
 
     private @Nullable String getGitLog(File repoDir) {
-        List<String> gitCommand = List.of("git", "log", "--pretty=format:Message: %s%nAuthor: %an%nDate: %ad%nCommit: %H%n");
+        List<String> gitCommand = List.of("git", "log", "--pretty=format:Message: %s%nAuthor: %an%nDate: %ad%nCommit: %H%nModified file:", "--name-only");
 
         ProcessBuilder processBuilder = new ProcessBuilder(gitCommand);
         processBuilder.directory(repoDir);
