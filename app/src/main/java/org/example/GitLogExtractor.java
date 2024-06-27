@@ -1,5 +1,6 @@
 package org.example;
 
+import com.toedter.calendar.JDateChooser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +13,8 @@ import javax.mail.internet.MimeMessage;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -29,6 +32,8 @@ public class GitLogExtractor extends JFrame {
     private static final Logger log = LogManager.getLogger(GitLogExtractor.class);
     private final JTextField repoPathField1;
     private final JTextField repoPathField2;
+    private final JDateChooser dateRangeChooser1;
+    private final JDateChooser dateRangeChooser2;
     private JTextArea logTextArea;
     private final Properties properties;
     private static final String PROPERTIES_FILE = "src/main/resources/config.properties";
@@ -45,9 +50,10 @@ public class GitLogExtractor extends JFrame {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
 
-        JPanel topPanel = new JPanel(new GridLayout(3, 1));
+        JPanel topPanel = new JPanel(new GridLayout(4, 1));
         JPanel repoPanel1 = new JPanel(new FlowLayout(LEFT));
         JPanel repoPanel2 = new JPanel(new FlowLayout(LEFT));
+        JPanel dateRangePanel = new JPanel(new FlowLayout(CENTER)); // Center the date range panel
         JPanel topButtonPanel = new JPanel(new FlowLayout(CENTER));
         JPanel bottomButtonPanel = new JPanel(new FlowLayout(CENTER));
 
@@ -83,22 +89,40 @@ public class GitLogExtractor extends JFrame {
         repoPanel2.add(repoPathField2);
         repoPanel2.add(browseButton2);
 
+        JLabel dateRangeLabel1 = new JLabel("Date Range 1:");
+        dateRangeChooser1 = new JDateChooser();
+        dateRangeChooser1.setDateFormatString("yyyy-MM-dd");
+        dateRangeChooser1.setPreferredSize(new Dimension(120, 20));
+
+        JLabel dateRangeLabel2 = new JLabel("Date Range 2:");
+        dateRangeChooser2 = new JDateChooser();
+        dateRangeChooser2.setDateFormatString("yyyy-MM-dd");
+        dateRangeChooser2.setPreferredSize(new Dimension(120, 20));
+
+        dateRangePanel.add(dateRangeLabel1);
+        dateRangePanel.add(dateRangeChooser1);
+        dateRangePanel.add(dateRangeLabel2);
+        dateRangePanel.add(dateRangeChooser2); // Add date range components to the centered panel
+
         JButton extractLogButton = new JButton("Extract git logs");
         extractLogButton.addActionListener(e -> {
             String repoPath1 = repoPathField1.getText().trim();
             String repoPath2 = repoPathField2.getText().trim();
+            String dateRange1 = getDateAsString(dateRangeChooser1.getDate());
+            String dateRange2 = getDateAsString(dateRangeChooser2.getDate());
 
             StringBuilder gitLog = new StringBuilder();
             String textBefore = "=== Beginning of Git Logs ===\n\n";
             gitLog.append(textBefore);
+
             if (!repoPath1.isEmpty()) {
                 gitLog.append("Repository 1:\n");
-                String log1 = getGitLog(new File(repoPath1));
+                String log1 = getGitLog(new File(repoPath1), dateRange1, dateRange2);
                 gitLog.append(log1 != null ? log1 : "Failed to extract Git log for repository 1.\n");
             }
             if (!repoPath2.isEmpty()) {
                 gitLog.append("\nRepository 2:\n");
-                String log2 = getGitLog(new File(repoPath2));
+                String log2 = getGitLog(new File(repoPath2), dateRange1, dateRange2);
                 gitLog.append(log2 != null ? log2 : "Failed to extract Git log for repository 2.\n");
             }
 
@@ -114,6 +138,7 @@ public class GitLogExtractor extends JFrame {
 
         topPanel.add(repoPanel1);
         topPanel.add(repoPanel2);
+        topPanel.add(dateRangePanel); // Add the centered date range panel to the top panel
         topPanel.add(topButtonPanel);
         mainPanel.add(topPanel, NORTH);
 
@@ -154,7 +179,6 @@ public class GitLogExtractor extends JFrame {
             String repoPath1 = properties.getProperty("repoPathField1", "");
             String repoPath2 = properties.getProperty("repoPathField2", "");
 
-            // Update GUI components
             invokeLater(() -> {
                 repoPathField1.setText(repoPath1);
                 repoPathField2.setText(repoPath2);
@@ -167,8 +191,13 @@ public class GitLogExtractor extends JFrame {
         }
     }
 
-    private @Nullable String getGitLog(File repoDir) {
-        List<String> gitCommand = List.of("git", "log", "--pretty=format:Message: %s%nAuthor: %an%nDate: %ad%nCommit: %H%nModified file:", "--name-only");
+    private @Nullable String getGitLog(File repoDir, String dateRange1, String dateRange2) {
+        List<String> gitCommand = new java.util.ArrayList<>(List.of("git", "log", "--pretty=format:Message: %s%nAuthor: %an%nDate: %ad%nCommit: %H%nModified file:", "--name-only"));
+
+        if (dateRange1 != null && !dateRange1.isEmpty() && dateRange2 != null && !dateRange2.isEmpty()) {
+            gitCommand.add("--since=" + dateRange1);
+            gitCommand.add("--until=" + dateRange2);
+        }
 
         ProcessBuilder processBuilder = new ProcessBuilder(gitCommand);
         processBuilder.directory(repoDir);
@@ -236,7 +265,7 @@ public class GitLogExtractor extends JFrame {
 
     private void createAndSaveEmail(String from, String to, String subject, String bodyText, String filePath) {
         var props = new Properties();
-        props.put("mail.smtp.host", "localhost"); // Dummy SMTP host for creating the email file
+        props.put("mail.smtp.host", "localhost");
 
         Session session = Session.getDefaultInstance(props, null);
 
@@ -247,10 +276,8 @@ public class GitLogExtractor extends JFrame {
             message.setSubject(subject);
             message.setText(bodyText);
 
-            // Mark the message as a draft
             message.addHeader("X-Unsent", "1");
 
-            // Save the message to a .eml file
             File emlFile = new File(filePath);
             try (FileOutputStream fos = new FileOutputStream(emlFile)) {
                 message.writeTo(fos);
@@ -261,6 +288,14 @@ public class GitLogExtractor extends JFrame {
         } catch (MessagingException | IOException e) {
             log.error("Unable to create draft email file!");
         }
+    }
+
+    private String getDateAsString(Date date) {
+        if (date == null) {
+            return "";
+        }
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return dateFormat.format(date);
     }
 
     public static void main(String[] args) {

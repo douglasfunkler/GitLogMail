@@ -19,6 +19,7 @@ dependencies {
     implementation("com.sun.mail:javax.mail:1.6.2")
     implementation("org.apache.poi:poi-scratchpad:5.2.3")
     implementation("org.jetbrains:annotations:24.0.1")
+    implementation("com.toedter:jcalendar:1.4")
 
     compileOnly("org.projectlombok:lombok:1.18.32")
     annotationProcessor("org.projectlombok:lombok:1.18.32")
