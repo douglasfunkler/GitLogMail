@@ -207,14 +207,14 @@ public class GitLogExtractor extends JFrame {
                 fileToSave = new File(fileToSave.getAbsolutePath() + ".eml");
             }
 
-            createAndSaveEmail("sender@example.com", "recipient@example.com", "Git Log Report", gitLog, fileToSave.getAbsolutePath());
+            createAndSaveEmail("sender@example.com", "recipient@example.com", "Git log report", gitLog, fileToSave.getAbsolutePath());
             showMessageDialog(this, "Log saved successfully to " + fileToSave.getAbsolutePath());
         }
     }
 
     private void saveGitLogToTextFile(String gitLog) {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Save Git Log");
+        fileChooser.setDialogTitle("Save Git log");
         int userSelection = fileChooser.showSaveDialog(this);
 
         if (userSelection == APPROVE_OPTION) {
