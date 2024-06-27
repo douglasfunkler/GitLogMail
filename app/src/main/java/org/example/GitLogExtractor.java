@@ -256,7 +256,7 @@ public class GitLogExtractor extends JFrame {
                 message.writeTo(fos);
             }
 
-            System.out.println("Email draft saved to " + emlFile.getAbsolutePath());
+            log.error("Email draft saved to " + emlFile.getAbsolutePath());
 
         } catch (MessagingException | IOException e) {
             log.error("Unable to create draft email file!");
