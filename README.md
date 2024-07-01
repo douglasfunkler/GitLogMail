@@ -1,1 +1,1 @@
-# GitLogMail
+# GitLogExtractor
